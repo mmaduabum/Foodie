@@ -1,0 +1,5 @@
+HTTP request from Twilio:
+
+ToCountry=US&ToState=CA&SmsMessageSid=SMdd8ab0c7205ce19052f299c64a1f93fa&NumMedia=0&ToCity=SAN+BRUNO&FromZip=07424&SmsSid=SMdd8ab0c7205ce19052f299c64a1f93fa&FromState=NJ&SmsStatus=received&FromCity=LITTLE+FALLS&Body=example+incoming+text&FromCountry=US&To=%2B16508351609&ToZip=94080&NumSegments=1&MessageSid=SMdd8ab0c7205ce19052f299c64a1f93fa&AccountSid=AC73e950f31868a3b24506e58cbb1585d9&From=%2B19739705321&ApiVersion=2010-04-01
+
+
