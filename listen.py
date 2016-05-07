@@ -1,12 +1,11 @@
 import sh
 from twilio.rest import TwilioRestClient
 import sys
+import messager
 
 FROM = "'From'"
 MSG = "'Body'"
 SPOOKY_INDEX = 4
-ACCOUNT_SID = "AC73e950f31868a3b24506e58cbb1585d9"
-AUTH_TOKEN = "e5ecf02cc2def042420962c7bb4345df"
 US = "+16508351609"
 
 
@@ -16,9 +15,8 @@ def crash():
 def reply_to_sender(dic):
     msg = dic[MSG].replace("+", " ")
     sender = dic[FROM][SPOOKY_INDEX:]
-    client = TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN)
     response = "Thanks for your reply! you said ' " + msg + "'. see you soon!"
-    client.messages.create(to=sender, from_=US, body=response)
+    messager.send_message(sender, response)
 
 
 def do_stuff(reply):
