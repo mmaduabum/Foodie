@@ -1,5 +1,6 @@
 import sh
 from twilio.rest import TwilioRestClient
+import sys
 
 FROM = "'From'"
 MSG = "'Body'"
@@ -7,6 +8,10 @@ SPOOKY_INDEX = 4
 ACCOUNT_SID = "AC73e950f31868a3b24506e58cbb1585d9"
 AUTH_TOKEN = "e5ecf02cc2def042420962c7bb4345df"
 US = "+16508351609"
+
+
+def crash():
+    sys.exit()
 
 def reply_to_sender(dic):
     msg = dic[MSG].replace("+", " ")
@@ -26,7 +31,15 @@ def do_stuff(reply):
     reply_to_sender(dic)
 
 #listen on port 80 in loop. probably a better way to do this
+errors = 0
 while True:
-    reply = str(sh.nc('-l', '-w', '1', '80'))
-    do_stuff(reply)
+    try:
+        reply = str(sh.nc('-l', '-w', '1', '80'))
+        do_stuff(reply)
+    except Exception as e:
+        #if errors > 100: crash()
+        f = open('crashes.txt', 'a+')
+        f.write(str(e))
+        f.write('\n')
+        errors += 1
 
