@@ -2,6 +2,7 @@ import sh
 from twilio.rest import TwilioRestClient
 import sys
 import messager
+import sqlite3
 
 FROM = "'From'"
 MSG = "'Body'"
@@ -15,7 +16,16 @@ def crash():
 def reply_to_sender(dic):
     msg = dic[MSG].replace("+", " ")
     sender = dic[FROM][SPOOKY_INDEX:]
-    response = "Thanks for your reply! you said ' " + msg + "'. see you soon!"
+    try:
+        sender_number = sender[1:][:-1]
+        conn = sqlite3.connect('monica.db')
+        c = conn.cursor()
+        c.execute("select u_name from user_map where user_id == " + sender_number + ";")
+        conn.commit()
+        sender_name = c.fetchone()[0]
+    except:
+        sender_name = "Wayne"
+    response = "Hello " + sender_name + "! We received your message."
     messager.send_message(sender, response)
 
 
