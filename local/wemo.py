@@ -12,4 +12,4 @@ env.start()
 #env.list_switches()
 
 switch = env.get_switch('ymcmb')
-print switch.on()
+print switch.current_power
