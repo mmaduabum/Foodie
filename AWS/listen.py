@@ -31,9 +31,9 @@ def reply_to_sender(dic):
 
 
 # gets the text message content from the HTTP request
-def do_stuff(reply):
+def handle_Twilio_response(incoming_message):
     #couldnt find a lib to parse the http data. This function makes it into a dictionary
-    list_of_fields = reply.replace('&', "','").replace("=", "':'").split(',')
+    list_of_fields = incoming_message.replace('&', "','").replace("=", "':'").split(',')
     dic = {}
     for field in list_of_fields:
         p = field.split(':')
@@ -44,12 +44,13 @@ def do_stuff(reply):
 errors = 0
 while True:
     try:
-        reply = str(sh.nc('-l', '-w', '1', '80'))
-        if "Twilio" not in reply:
-            msg_start = reply.index("RAM") + 3
-            response = reply[msg_start:]
+        incoming_message = str(sh.nc('-l', '-w', '1', '80'))
+        if "Twilio" not in incoming_message:
+            msg_start = incoming_message.index("RAM") + 3
+            response = incoming_message[msg_start:]
             messager.send_message(msg=response)
-        do_stuff(reply)
+        else:
+            handle_Twilio_response(incoming_message)
     except Exception as e:
         #if errors > 100: crash()
         f = open('crashes.txt', 'a+')
