@@ -45,8 +45,10 @@ errors = 0
 while True:
     try:
         reply = str(sh.nc('-l', '-w', '1', '80'))
-        if (reply[0:2] == "RAM"):
-            messager.send_message(msg="POWER IS OFF")
+        if "Twilio" not in reply:
+            msg_start = reply.index("RAM") + 3
+            response = reply[msg_start:]
+            messager.send_message(msg=response)
         do_stuff(reply)
     except Exception as e:
         #if errors > 100: crash()
