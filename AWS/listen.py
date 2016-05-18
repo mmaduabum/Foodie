@@ -13,6 +13,7 @@ US = "+16508351609"
 def crash():
     sys.exit()
 
+
 def reply_to_sender(dic):
     msg = dic[MSG].replace("+", " ")
     sender = dic[FROM][SPOOKY_INDEX:]
@@ -29,6 +30,7 @@ def reply_to_sender(dic):
     messager.send_message(sender, response)
 
 
+# gets the text message content from the HTTP request
 def do_stuff(reply):
     #couldnt find a lib to parse the http data. This function makes it into a dictionary
     list_of_fields = reply.replace('&', "','").replace("=", "':'").split(',')
@@ -43,6 +45,8 @@ errors = 0
 while True:
     try:
         reply = str(sh.nc('-l', '-w', '1', '80'))
+        if (reply[0:2] == "RAM"):
+            messager.send_message(msg="POWER IS OFF")
         do_stuff(reply)
     except Exception as e:
         #if errors > 100: crash()
