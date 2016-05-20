@@ -2,3 +2,21 @@
 #AWS INFO#
 ##########
 public ip: 52.39.99.178
+
+#startup from 0
+power is 0
+power is 2795
+power is 4895
+power is 5745
+power is 6030
+power is 6155
+
+#shutdown
+power is 6240
+power is 6250
+power is 2595
+power is 930
+power is 325
+power is 95
+power is 15
+power is 0
