@@ -30,10 +30,10 @@ last_state = "off"
 while True:
 	power = switch.current_power
 	print "power is " + str(power)
-	if power < 10 and last_state == "on":
+	if power < 4500 and last_state == "on":
 		notify_AWS(OFF)
 		last_state = "off"
-	elif power > 2000 and last_state == "off":
+	elif power > 100 and last_state == "off":
 		notify_AWS(ON)
 		last_state = "on"
 	time.sleep(2)
