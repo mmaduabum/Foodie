@@ -47,7 +47,7 @@ def handle_message(dic):
             messager.send_message(sender, "You are now subscribed to your device! To unsubscribe, reply 'unsubscribe'")
 
     elif "unsubscribe" in msg:
-        if subscribed:
+        if subscribed and sender == subscriber:
             subscribed = False
             subscriber = BEAKS
             messager.send_message(sender, "You have unsubscribed. To resubscribe, reply 'subscribe'")
@@ -70,24 +70,22 @@ def parse_Twilio_response(incoming_message):
 def ram():
     #listen on port 80 in loop. probably a better way to do this
     while True:
-        incoming_message = str(sh.nc('-l', '-w', '1', '80'))
-        if "Twilio" not in incoming_message:
-            msg_start = incoming_message.index("RAM") + 3
-            response = incoming_message[msg_start:]
-            messager.send_message(subscriber, msg=response)
-        else:
-            parse_Twilio_response(incoming_message)
-
+        try:
+            incoming_message = str(sh.nc('-l', '-w', '1', '80'))
+            if "Twilio" not in incoming_message:
+                msg_start = incoming_message.index("RAM") + 3
+                response = incoming_message[msg_start:]
+                messager.send_message(subscriber, msg=response)
+            else:
+                parse_Twilio_response(incoming_message)
+        except Exception as e:
+            f = open('crashes.txt', 'a+')
+            f.write(str(e))
+            f.write('\n')
 
 def main():
     subscribed = False
     subscriber = BEAKS
-    try:
-        ram()
-    except Exception as e:
-        f = open('crashes.txt', 'a+')
-        f.write(str(e))
-        f.write('\n')
-
+    ram()
 
 main()
