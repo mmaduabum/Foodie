@@ -11,6 +11,7 @@ US = "+16508351609"
 BEAKS = "+16464630213"
 subscriber = BEAKS
 subscribed = False
+port = "80"
 
 def crash():
     sys.exit()
@@ -37,25 +38,25 @@ def handle_message(dic):
     global subscribed
     msg = dic[MSG].replace("+", " ").lower()
     sender = dic[FROM][SPOOKY_INDEX:]
-    if "subscribe" in msg and "unsubscribe" not in msg:
+    if "follow" in msg and "unfollow" not in msg:
         if subscribed:
-            if sender == subscriber: messager.send_message(sender, "you are already subscribed")
+            if sender == subscriber: messager.send_message(sender, "you are already following this device")
             else: messager.send_message(sender,"Sorry, this device is currently locked")
         else:
             subscribed = True
             subscriber = sender
-            messager.send_message(sender, "You are now subscribed to your device! To unsubscribe, reply 'unsubscribe'")
+            messager.send_message(sender, "You are now following your device! To unfollow, reply 'unfollow'")
 
-    elif "unsubscribe" in msg:
+    elif "unfollow" in msg:
         if subscribed and sender == subscriber:
             subscribed = False
             subscriber = BEAKS
-            messager.send_message(sender, "You have unsubscribed. To resubscribe, reply 'subscribe'")
+            messager.send_message(sender, "You have unfollowd this device. To refollow, reply 'follow'")
         else:
-            messager.send_message(sender, "You are not subscribed to a device. To subscribe, reply 'subscribe'")
+            messager.send_message(sender, "You are not following a device. To follow, reply 'follow'")
 
     else:
-        messager.send_message(sender, "Hey there! Unfortunately, we don't recognize your request. To subscribe to a device, reply 'subscribe'")
+        messager.send_message(sender, "Hey there! Unfortunately, we don't recognize your request. To follow to a device, reply 'follow'")
 
 # gets the text message content from the HTTP request
 def parse_Twilio_response(incoming_message):
@@ -71,7 +72,7 @@ def ram():
     #listen on port 80 in loop. probably a better way to do this
     while True:
         try:
-            incoming_message = str(sh.nc('-l', '-w', '1', '80'))
+            incoming_message = str(sh.nc('-l', '-w', '1', port))
             if "Twilio" not in incoming_message:
                 msg_start = incoming_message.index("RAM") + 3
                 response = incoming_message[msg_start:]
