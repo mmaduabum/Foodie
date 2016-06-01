@@ -38,10 +38,10 @@ last_powers = [0, 0, 0]
 
 while True:
 	power = switch.current_power
-	l.pop(0)
-	l.append(power)
+	last_powers.pop(0)
+	last_powers.append(power)
 	print "power is " + str(power)
-	if power < 4500 and last_power powering_off(last_powers):
+	if power < 4500 and powering_off(last_powers):
 		notify_AWS(OFF)
 		last_state = "off"
 	elif powering_on(last_powers):
