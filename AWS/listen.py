@@ -11,6 +11,7 @@ US = "+16508351609"
 BEAKS = "+16464630213"
 subscriber = BEAKS
 subscribed = False
+port = "80"
 
 def crash():
     sys.exit()
@@ -71,7 +72,7 @@ def ram():
     #listen on port 80 in loop. probably a better way to do this
     while True:
         try:
-            incoming_message = str(sh.nc('-l', '-w', '1', '80'))
+            incoming_message = str(sh.nc('-l', '-w', '1', port))
             if "Twilio" not in incoming_message:
                 msg_start = incoming_message.index("RAM") + 3
                 response = incoming_message[msg_start:]
