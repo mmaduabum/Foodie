@@ -23,7 +23,10 @@ switch = env.get_switch('ymcmb')
 
 def notify_AWS(state):
 	conn = httplib.HTTPConnection("52.39.99.178")
-	msg = "RAMYour device is now " + state
+	if state == OFF:
+		msg = "RAMYour device is now " + state + ". To unfollow, reply 'unfollow'" 
+	else:
+		msg = "RAMYour device is now " + state
 	conn.request("POST", "", msg)
 
 
