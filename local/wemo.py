@@ -25,15 +25,15 @@ def notify_AWS(state):
 	conn.request("POST", "", msg)
 
 
-last_state = "off"
+last_power = 0
 
 while True:
 	power = switch.current_power
 	print "power is " + str(power)
-	if power < 4500 and last_state == "on":
+	if power < 4500 and last_power > 4500:
 		notify_AWS(OFF)
 		last_state = "off"
-	elif power > 100 and last_state == "off":
+	elif power > 100 and last_power < 100:
 		notify_AWS(ON)
 		last_state = "on"
 	time.sleep(2)
