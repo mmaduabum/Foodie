@@ -4,6 +4,8 @@ import httplib
 
 ON = "on"
 OFF = "off"
+THRESH = 4500
+
 
 def on_switch(switch):
     print "Switch found!", switch.name
@@ -33,7 +35,7 @@ def powering_on(history):
 	old, med, new = history
 	return old < med and med < new
 
-
+last_state = "off"
 last_powers = [0, 0, 0]
 
 while True:
@@ -41,12 +43,12 @@ while True:
 	last_powers.pop(0)
 	last_powers.append(power)
 	print "power is " + str(power)
-	if power < 4500 and powering_off(last_powers):
+	if power < THRESH and powering_off(last_powers) and last_state == "on":
 		notify_AWS(OFF)
 		last_state = "off"
-	elif powering_on(last_powers):
+	elif power < THRESH and powering_on(last_powers) and last_state == "off":
 		notify_AWS(ON)
 		last_state = "on"
-	time.sleep(2)
+	time.sleep(1)
 
 
