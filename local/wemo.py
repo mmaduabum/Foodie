@@ -4,7 +4,7 @@ import httplib
 
 ON = "on"
 OFF = "off"
-THRESH = 4500
+THRESH = 400
 
 
 def on_switch(switch):
