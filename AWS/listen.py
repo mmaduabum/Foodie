@@ -32,8 +32,8 @@ def reply_to_sender(dic):
         sender_name = ""
         c.execute("INSERT OR IGNORE INTO user_map ('user_id', 'u_name') VALUES (sender_number, sender_name)")
     response = "Hello " + sender_name + "! We received your message."
-    if sender_name == "":
-        messager.send_message(sender, "If you would like to set your name, reply with: set name [your name]")
+    # if sender_name == "":
+    #     messager.send_message(sender, "If you would like to set your name, reply with: set name [your name]")
     messager.send_message(sender, response)
 
 def get_name(dic):
@@ -77,36 +77,6 @@ def handle_message(dic):
 
     else:
         messager.send_message(sender, "Hey there! Unfortunately, we don't recognize your request. To follow to a device, reply 'follow'")
-
-# def handle_message(dic):
-#     global subscriber
-#     global subscribed
-#     msg = dic[MSG].replace("+", " ").lower()
-#     sender = dic[FROM][SPOOKY_INDEX:]
-#     sender_number = sender[1:][:-1]
-#     sender_name = get_name(dic)
-#     if "follow" in msg and "unfollow" not in msg:
-#         if subscribed:
-#             if sender == subscriber: messager.send_message(sender, "you are already following this device")
-#             else: messager.send_message(sender,"Sorry, this device is currently locked")
-#         else:
-#             subscribed = True
-#             subscriber = sender
-#             messager.send_message(sender, "You are now following your device! To unfollow, reply 'unfollow'")
-#             c.execute("INSERT OR IGNORE INTO user_map (user_id, switch_id) VALUES (sender_number, switch)")
-
-#     elif "unfollow" in msg:
-#         if subscribed and sender == subscriber:
-#             subscribed = False
-#             subscriber = BEAKS
-#             messager.send_message(sender, "You have unfollowd this device. To refollow, reply 'follow'")
-#         else:
-#             messager.send_message(sender, "You are not following a device. To follow, reply 'follow'")
-#     elif "set name" in msg:
-#         sender_name = msg.split()[2]
-#         c.execute("INSERT OR IGNORE INTO user_map ('user_id', 'u_name') VALUES (sender_number, sender_name)")
-#     else:
-#         messager.send_message(sender, "Hey there! Unfortunately, we don't recognize your request. To follow to a device, reply 'follow'")
 
 # gets the text message content from the HTTP request
 def parse_Twilio_response(incoming_message):
