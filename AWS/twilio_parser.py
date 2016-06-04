@@ -38,12 +38,12 @@ def follow_response(dic):
 
 def unfollow_response(dic):
     response = dic[c.RSP]
-	if c.SWITCH_ID in dic:
-		response += dic[c.SWITCH_ID]
+    if c.SWITCH_ID in dic:
+	response += dic[c.SWITCH_ID]
 
 def add_response(dic):
     response = dic[c.RSP]
-	response += dic[c.SWITCH_ID]
+    response += dic[c.SWITCH_ID]
 
 def remove_response(dic):
     response = dic[c.RSP]
@@ -55,29 +55,29 @@ def remove_response(dic):
 def status_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_ID and c.SWITCH_STATUS in dic:
-        response += dic[c.SWITCH_ID] " is " + dic[SWITCH_STATUS]
+        response += dic[c.SWITCH_ID] + " is " + dic[SWITCH_STATUS]
     return response   
 
 def list_response(dic):
     response = dic[c.RSP]
-    if c.SWITCH_IDS in dic:
-        switches = dic[c.SWITCH_IDS]
-        for switch in switches
+    if c.SWITCH_ID in dic:
+        switches = dic[c.SWITCH_ID]
+        for switch in switches:
             response += switch + "\n"
 
     return response
 
 def setname_response(dic):
     response = dic[c.RSP]
-    if c.SWITCH_IDS and c.SWITCH_NAME in dic:
-        response += switch + "can now be addressed as " c.SWITCH_NAME
+    if c.SWITCH_ID and c.SWITCH_NAME in dic:
+        response += dic[c.SWITCH_ID] + "can now be addressed as " + dic[c.SWITCH_NAME]
 
     return response
 
 def setdefault_response(dic):
     response = dic[c.RSP]
-    if c.SWITCH_IDS in dic:
-        response += c.SWITCH_IDS
+    if c.SWITCH_ID in dic:
+        response += dic[c.SWITCH_ID]
     
     return response
 
@@ -85,7 +85,11 @@ def setdefault_response(dic):
 def build_response(sender, response_dic):
     if response_dic is None:
         return c.DEFAULT_ERROR_MESSAGE
-    response = ""
+    response = "Hey! We are processing your request"
     command = response_dic[c.CMD]
-    
+    parsers = [follow_response, unfollow_response, add_response, remove_response, status_response, list_response, setname_response, setdefault_response]
+    for parser, cmd in zip(parsers, c.VALID_CMDS):
+        if command == cmd:
+            return parser(response_dic)
+                
     return response 
