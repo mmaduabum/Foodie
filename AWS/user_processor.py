@@ -84,4 +84,5 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    sys.stderr = open("log.txt", "a")
     accept_command()
