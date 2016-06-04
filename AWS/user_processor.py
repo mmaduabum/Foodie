@@ -6,14 +6,9 @@ import sqlite3
 import time
 import BaseHTTPServer
 import twilio_parser as parser
+import constants as c
 
 
-HOST_NAME = ""
-PORT_NUMBER = 80
-TWILIO_SIGNATURE = "x-twilio-signature"
-FROM = "'From'"
-MSG = "'Body'"
-SPOOKY_INDEX = 4
 
 
 class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -28,10 +23,11 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     #handle Twilio Post
     def do_POST(s):
         print "="*80
-        if TWILIO_SIGNATURE in s.headers:
+        if c.TWILIO_SIGNATURE in s.headers:
             http_in = s.rfile.read(int(s.headers.getheader('Content-Length')))
-            dic = parser.twilio_to_dic(http_in)
-            print dic[MSG]
+            twilio_dic = parser.twilio_to_dic(http_in)
+            commands = parser.get_command(twilio_dic[c.FROM], twilio_dic[c.MSG])
+            print commands
         s.send_response(200)
 
 
@@ -53,6 +49,6 @@ def accept_command():
 
 if __name__ == "__main__":
     server_class = BaseHTTPServer.HTTPServer
-    parrot = server_class((HOST_NAME, PORT_NUMBER), UserHandler)
+    parrot = server_class((c.HOST_NAME, c.USER_PORT_NUMBER), UserHandler)
     parrot.serve_forever()
     parrot.server_close()
