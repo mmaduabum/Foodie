@@ -57,10 +57,11 @@ def handle_message(dic):
     global subscriber
     global subscribed
     msg = dic[MSG].replace("+", " ").lower()
+    print msg
     sender = dic[FROM][SPOOKY_INDEX:]
     if "follow" in msg and "unfollow" not in msg:
         if subscribed:
-            if sender == subscriber: messager.send_message(sender, "you are already following this device")
+            if sender == subscriber: messager.send_message(sender, "you are already following this device\nThis is a new line\n. THis too!")
             else: messager.send_message(sender,"Sorry, this device is currently locked")
         else:
             subscribed = True

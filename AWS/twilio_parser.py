@@ -32,15 +32,18 @@ def get_command(sender, msg):
 def follow_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_TIME in dic and c.SWITCH_ID in dic:
-        response += dic[c.SWITCH_ID] + " for " dic[c.SWITCH_TIME]
+        response += dic[c.SWITCH_ID] + " for " + dic[c.SWITCH_TIME]
 
     return response
 
 def unfollow_response(dic):
-    pass
+    response = dic[c.RSP]
+	if c.SWITCH_ID in dic:
+		response += dic[c.SWITCH_ID]
 
 def add_response(dic):
-    pass
+    response = dic[c.RSP]
+	response += dic[c.SWITCH_ID]
 
 def remove_response(dic):
     response = dic[c.RSP]
