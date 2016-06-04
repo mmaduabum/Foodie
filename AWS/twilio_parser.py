@@ -16,10 +16,9 @@ port = "80"
 
 
 def twilio_to_dic(incoming_message):
-    #couldnt find a lib to parse the http data. This function makes it into a dictionary
     list_of_fields = incoming_message.replace('&', "','").replace("=", "':'").split(',')
     dic = {}
     for field in list_of_fields:
         p = field.split(':')
-        dic[p[0]] = p[1]
+        dic[p[0]] = p[1].replace("+", " ")
     return dic
