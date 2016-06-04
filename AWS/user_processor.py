@@ -19,9 +19,10 @@ def accept_command():
 
 
 """Notify the user on the status of the command"""
-def respond_to_user(user, response):
-    messager.send_message(user, response)
-
+def respond_to_user_twilio(s, response):
+    s.send_header("Content-type", "text/plain")
+    s.end_headers()
+    s.wfile.write(response)
 
 def process_follow(cmd_dic, platform):
     pass
@@ -75,10 +76,8 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             commands = parser.get_command(user, twilio_dic[c.MSG])
             resp_dic = process_command(commands) if commands is not None else None
             response = parser.build_response(user, resp_dic)
-            print response
             s.send_response(200)
-            respond_to_user(user, response)
-            #s.wfile.write(response) --fuck twilio
+            respond_to_user_twilio(s, response)
         else:
             assert(False)
 
