@@ -43,22 +43,43 @@ def add_response(dic):
     pass
 
 def remove_response(dic):
-    pass
+    response = dic[c.RSP]
+    if c.SWITCH_ID in dic:
+        response += dic[c.SWITCH_ID]
+
+    return response
 
 def status_response(dic):
-    pass
+    response = dic[c.RSP]
+    if c.SWITCH_ID and c.SWITCH_STATUS in dic:
+        response += dic[c.SWITCH_ID] " is " + dic[SWITCH_STATUS]
+    return response   
 
 def list_response(dic):
-    pass
+    response = dic[c.RSP]
+    if c.SWITCH_IDS in dic:
+        switches = dic[c.SWITCH_IDS]
+        for switch in switches
+            response += switch + "\n"
+
+    return response
 
 def setname_response(dic):
-    pass
+    response = dic[c.RSP]
+    if c.SWITCH_IDS and c.SWITCH_NAME in dic:
+        response += switch + "can now be addressed as " c.SWITCH_NAME
+
+    return response
 
 def setdefault_response(dic):
-    pass
+    response = dic[c.RSP]
+    if c.SWITCH_IDS in dic:
+        response += c.SWITCH_IDS
+    
+    return response
 
 
-def build_response(sender, response_dic)
+def build_response(sender, response_dic):
     if response_dic is None:
         return c.DEFAULT_ERROR_MESSAGE
     response = ""
