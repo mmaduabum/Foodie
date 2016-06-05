@@ -106,6 +106,7 @@ def process_add(cmd_dic, platform, conn, cursor):
     return response_dic
 
 def process_remove(cmd_dic, platform, conn, cursor):
+    
     pass
 
 def process_status(cmd_dic, platform, conn, cursor):
