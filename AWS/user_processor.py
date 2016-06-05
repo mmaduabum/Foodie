@@ -25,7 +25,34 @@ def respond_to_user_twilio(s, response):
     s.wfile.write(response)
 
 def process_follow(cmd_dic, platform, conn, cursor):
-    pass
+    rsp_dic = {c.CMD : cmd_dic[c.CMD]}
+    args = cmd_dic[c.ARGS]
+    user = cmd_dic[c.USER]
+    if len(args) == 0:
+        repeat = "select * from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
+        data = cursor.execute(repeat).fetchall()
+        if len(data) == 0:
+            rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
+            rsp_dic[c.FOLLOW_TIME] = c.DEFAULT_TIME
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+        else:
+            query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
+            end_time = cursor.execute(query).fetchall()[0][0]
+            duration = c.DEFAULT_TIME - 1 #do math with end_time to find true answer
+            rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
+            rsp_dic[c.FOLLOW_TIME] = duration
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+    elif len(args) == 1:
+        validate = "select * from map where"  
+        pass
+    elif len(args) == 2:
+        pass
+    else:
+        rsp_dic = None
+    
+    cursor.close()
+    conn.close()
+    return rsp_dic
 
 def process_unfollow(cmd_dic, platform, conn, cursor):
     pass
@@ -49,6 +76,15 @@ def process_setdefault(cmd_dic, platform, conn, cursor):
     pass
 
 
+def validate_user(user, conn, cursor, platform_id):
+    check = "select * from users where user_id == " + user + ";"
+    results = cursor.execute(check)
+    data = results.fetchall()
+    if len(data) == 0:
+        add_user = "INSERT INTO users (user_id, platform_id, default_switch) VALUES (" + user + ", " + str(platform_id) + ", 1);"
+        cursor.execute(add_user)
+        conn.commit()
+
 """execute the user's command"""
 def process_command(cmd_dic, platform=False):
     processors = [process_follow, process_unfollow, process_add, process_remove, process_status, process_list, process_setname, process_setdefault]
@@ -57,6 +93,7 @@ def process_command(cmd_dic, platform=False):
         if cmd == command:
             conn = sqlite3.connect(c.DB)
             cursor = conn.cursor()
+            validate_user(cmd_dic[c.USER], conn, cursor, 1)
             return proc(cmd_dic, platform, conn, cursor)
 
 
@@ -86,5 +123,5 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    sys.stderr = open("log.txt", "a")
+    #sys.stderr = open("log.txt", "a")
     accept_command()

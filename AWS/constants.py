@@ -25,3 +25,5 @@ STATUS_MSGS = ["Your device is currently ", "You must first follow a switch befo
 LIST_MSGS = ["Your switch list is: "]
 SETNAME_MSGS = []
 SETDEF_MSGS = []
+DEFAULT_SWITCH = 1
+DEFAULT_TIME = 10
