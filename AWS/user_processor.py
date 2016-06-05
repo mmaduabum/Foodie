@@ -80,13 +80,13 @@ def process_add(cmd_dic, platform, conn, cursor):
             response_dic[c.CMD] = cmd_dic[c.CMD]
             unique = "select * from map where switch_id == " + switch + " and user_id == " + user + ";"
             results = cursor.execute(unique).fetchall()
-            #The switch has already been added
+            #The user is mapped to the switch, want to remove them
             if len(results) > 0:
-                response_dic[c.RSP] = c.ADD_MSGS[1]
-            #Add the switch to the database
-            else:
-                cursor.execute("INSERT INTO map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) VALUES ("+switch+","+user+",null,null,0);")
+                cursor.execute("DELETE FROM map WHERE switch_id="+switch+" and user_id="+user+";")
                 conn.commit()
+		response_dic[c.RSP] = c.ADD_MSGS[1]
+	    #the user isn't mapped to the switch, can't be removed, send message back	
+            else:
                 response_dic[c.RSP] = c.ADD_MSGS[0]
         #The supplied switch id is not a valid switch id
         else:

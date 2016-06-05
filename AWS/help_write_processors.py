@@ -3,19 +3,16 @@ SWITCHES: switch_id, state
 SWITCH_USER_MAP: switch_id, user_id, name, sub_tmstmp_exp, sub_bool
 
 
-
-
-
 def process_follow(cmd_dic, platform):
     args = cmd_dic[c.ARGS]
     
-    //if 1 arg: follow that arg switch ( check if its valid) , and if its mapped to user
+    #if 1 arg: follow that arg switch ( check if its valid) , and if its mapped to user
     
     
     check = "select * from maps where "
 
 def process_unfollow(cmd_dic, platform):
-    args = cmd_dic[c.ARGS]
+   args = cmd_dic[c.ARGS]
     if len(args) == 0:
 
     else:
@@ -47,7 +44,37 @@ def process_add(cmd_dic, platform):
     return response_dic
 
 def process_remove(cmd_dic, platform):
-    pass
+    reponse_dic = {}
+    args = cmd_dic[c.ARGS]
+    #This command must have at elast 1 argument
+    if len(args) == 0:
+       response_dic = None
+    else:
+        switch = args[0]
+        user = cmd_dic[c.USER]
+        check = "select * from switches where switch_id == " + switch + ";"
+        a = cursor.execute(check)
+        data = a.fetchall()
+        #This is a valid switch id
+        if len(data) > 0:
+            response_dic[c.SWITCH_ID] = switch
+            response_dic[c.CMD] = cmd_dic[c.CMD]
+            unique = "select * from map where switch_id == " + switch + " and user_id == " + user + ";"
+            results = cursor.execute(unique).fetchall()
+            #The switch has already been added
+            if len(results) > 0:
+                response_dic[c.RSP] = c.ADD_MSGS[1]
+            #Add the switch to the database
+            else:
+                cursor.execute("INSERT INTO map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) VALUES ("+switch+","+user+",null,null,0);")
+                conn.commit()
+                response_dic[c.RSP] = c.ADD_MSGS[0]
+        #The supplied switch id is not a valid switch id
+        else:
+            response_dic = None
+    cursor.close()
+    conn.close()
+return response_dic
 
 def process_status(cmd_dic, platform):
     pass
