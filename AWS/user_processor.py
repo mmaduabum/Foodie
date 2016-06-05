@@ -46,8 +46,18 @@ def process_follow(cmd_dic, platform, conn, cursor):
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
     #use default time
     elif len(args) == 1:
-        validate = "select * from map where"  
-        pass
+        switch = args[0]
+        validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
+        data = cursor.execute(validate).fetchall()
+        #the user has not yet added this switch
+        if len(data) == 0:
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[2]
+        else:
+            update = "update map set fetty_flag = 1 where user_id == " + user + " and switch_id == " + switch + ";"
+            cursor.execute(update)
+            conn.commit()
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+            rsp_dic[c.SWITCH_ID] = switch
     
     elif len(args) == 2:
         pass
