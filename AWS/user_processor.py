@@ -24,28 +24,28 @@ def respond_to_user_twilio(s, response):
     s.end_headers()
     s.wfile.write(response)
 
-def process_follow(cmd_dic, platform):
+def process_follow(cmd_dic, platform, conn, cursor):
     pass
 
-def process_unfollow(cmd_dic, platform):
+def process_unfollow(cmd_dic, platform, conn, cursor):
     pass
 
-def process_add(cmd_dic, platform):
+def process_add(cmd_dic, platform, conn, cursor):
     pass
 
-def process_remove(cmd_dic, platform):
+def process_remove(cmd_dic, platform, conn, cursor):
     pass
 
-def process_status(cmd_dic, platform):
+def process_status(cmd_dic, platform, conn, cursor):
     pass
 
-def process_list(cmd_dic, platform):
+def process_list(cmd_dic, platform, conn, cursor):
     pass
 
-def process_setname(cmd_dic, platform):
+def process_setname(cmd_dic, platform, conn, cursor):
     pass
 
-def process_setdefault(cmd_dic, platform):
+def process_setdefault(cmd_dic, platform, conn, cursor):
     pass
 
 
@@ -55,7 +55,9 @@ def process_command(cmd_dic, platform=False):
     command = cmd_dic[c.CMD]
     for cmd, proc in zip(c.VALID_CMDS, processors):
         if cmd == command:
-            return proc(cmd_dic, platform)
+            conn = sqlite3.connect(c.DB)
+            cursor = conn.cursor()
+            return proc(cmd_dic, platform, conn, cursor)
 
 
 class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
