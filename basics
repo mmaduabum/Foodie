@@ -3,6 +3,11 @@
 ##########
 public ip: 52.39.99.178
 
+##############
+#Time parsing#
+##############
+https://github.com/wroberts/pytimeparse
+
 #startup from 0
 power is 0
 power is 2795
