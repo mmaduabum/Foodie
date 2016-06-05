@@ -1,4 +1,4 @@
-sqlite_file = 'monica.db'
+DB = 'monica.db'
 FROM = "From"
 MSG = "Body"
 SPOOKY_INDEX = 4
