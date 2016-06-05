@@ -32,7 +32,7 @@ def get_command(sender, msg):
 def follow_response(dic):
     response = dic[c.RSP]
     if c.FOLLOW_TIME in dic and c.SWITCH_ID in dic:
-        response += str(dic[c.SWITCH_ID]) + " for " + str(dic[c.FOLLOW_TIME])
+        response += str(dic[c.SWITCH_ID]) + " for " + str(dic[c.FOLLOW_TIME]) + " minutes"
     if c.FOLLOW_TIME not in dic and c.SWITCH_ID in dic:
         response += str(dic[c.SWITCH_ID])
 

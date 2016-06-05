@@ -1,7 +1,7 @@
 import sh
 from twilio.rest import TwilioRestClient
 import sys
-import messager
+import messager as m
 import sqlite3
 import time
 import BaseHTTPServer
@@ -15,6 +15,12 @@ def sanitize(args):
         if (not set(a).isdisjoint(bad)):
             return False
     return True
+
+
+def timestamp_to_seconds(stamp):
+    pattern = '%Y-%m-%d %H:%M:%S'
+    sex = int(time.mktime(time.strptime(stamp, pattern)))
+    return sex
 
 
 """Listen on port 80 for incoming user command"""
@@ -35,21 +41,34 @@ def process_follow(cmd_dic, platform, conn, cursor):
     rsp_dic = {c.CMD : cmd_dic[c.CMD]}
     args = cmd_dic[c.ARGS]
     user = cmd_dic[c.USER]
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     #Use default switch 
     if len(args) == 0:
         repeat = "select * from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
         data = cursor.execute(repeat).fetchall()
+        #need to first add default switch
         if len(data) == 0:
+            add_default = "insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (" + \
+                             str(c.DEFAULT_SWITCH) + ", " + user + ", null, null, 0);"
+            cursor.execute(add_default)
+            conn.commit()
             rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
             rsp_dic[c.FOLLOW_TIME] = c.DEFAULT_TIME
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+            sub_time = current_time
+            update = 'update map set sub_timeout = DATETIME("' + sub_time + '", "+10 minutes")' + \
+                        ' where user_id == ' + user + ' and switch_id == ' + str(c.DEFAULT_SWITCH) + ';'
+            cursor.execute(update)
+            conn.commit()
         #user is already following 
         else:
             query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
             end_time = cursor.execute(query).fetchall()[0][0]
-            duration = c.DEFAULT_TIME - 1 #do math with end_time to find true answer
+            duration = timestamp_to_seconds(end_time)
+            time_left = duration - timestamp_to_seconds(current_time)
+            minutes_left = time_left/60 + 1
             rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
-            rsp_dic[c.FOLLOW_TIME] = duration
+            rsp_dic[c.FOLLOW_TIME] = minutes_left
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
     #use default time
     elif len(args) == 1:
@@ -246,11 +265,13 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 response = parser.build_response(user, resp_dic)
                 s.send_response(200)
                 respond_to_user_twilio(s, response)
+            else:
+                m.send_message(user, "Fuck off")
         else:
             assert(False)
 
 
 
 if __name__ == "__main__":
-    sys.stderr = open("log.txt", "a+")
+    #sys.stderr = open("log.txt", "a+")
     accept_command()
