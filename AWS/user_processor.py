@@ -87,8 +87,8 @@ def process_follow(cmd_dic, platform, conn, cursor):
         #user is not yet following this switch
         if len(data) == 0:
             minutes = args[1]
-            update = 'update map set sub_timeout = DATETIME("' + current_time + '", "+' + minutes + ' minutes")' + \
-                        ' where user_id == ' + user + ' and switch_id == ' + switch + ';'
+            update = 'insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (' + switch + \
+                 ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 0);'
             cursor.execute(update)
             conn.commit()
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
