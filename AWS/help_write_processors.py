@@ -24,19 +24,27 @@ def process_unfollow(cmd_dic, platform):
     pass
 
 def process_add(cmd_dic, platform):
+    response_dic = {}
     args = cmd_dic[c.ARGS]
     if len(args) == 0:
-       //ERROR
+       response_dic = None
     else:
 	switch = args[0]
+        user = cmd_dic[c.USER]
     	check = "select * from switches where switch_id == " + switch + ";"
 	a = cursor.execute(check)
 	data = a.fetchall()
         if len(data) > 0:
-            c.execute("INSERT INTO map (switch_id,"+switch+","+"null,null){idf}, {cn}) VALUES('some_id1', DATE('now'))"\
-         .format(tn=table_name, idf=id_field, cn=date_col))
+            c.execute("INSERT INTO map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) VALUES ("+switch+","+user+",null,null,0);")
+            c.commit()
+            response_dic[c.RSP] = c.ADD_MSGS[0]
+            response_dic[c.CMD] = cmd_dic[c.CMD]
+            response_dic[c.SWITCH_ID] = switch
+        else:
+            response_dic = None
     connection.close()
     cursor.close()
+    return response_dic
 
 def process_remove(cmd_dic, platform):
     pass

@@ -12,7 +12,7 @@ def process_follow(cmd_dic, platform):
     //if 1 arg: follow that arg switch ( check if its valid) , and if its mapped to user
     
     
-    check = "select * from maps where 
+    check = "select * from maps where "
 
 def process_unfollow(cmd_dic, platform):
     args = cmd_dic[c.ARGS]
@@ -32,10 +32,11 @@ def process_add(cmd_dic, platform):
     	check = "select * from switches where switch_id == " + switch + ";"
 	a = cursor.execute(check)
 	data = a.fetchall()
-	
-	
-connection.close()
-cursor.close()
+        if len(data) > 0:
+            c.execute("INSERT INTO map (switch_id,"+switch+","+"null,null){idf}, {cn}) VALUES('some_id1', DATE('now'))"\
+         .format(tn=table_name, idf=id_field, cn=date_col))
+    connection.close()
+    cursor.close()
 
 def process_remove(cmd_dic, platform):
     pass
