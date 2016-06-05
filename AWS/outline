@@ -1,0 +1,54 @@
+command overview:
+
+-Follow:
+follow [switch_id/name] [time]
+	if there are 0 arguments: then do the default switch:
+	if the switch_id/name doesn't exist: that's an error
+	if the time argument is missing, then we're toggling the one-time flag
+	if the time argument is malformed, we assume it's a one-time follow
+	if switch_id/name is and valid time is there, set the exp time to current_time() + time
+	//someone needs to parse time into a seconds
+
+-Unfollow:
+unfollow [switch_id/name]
+	if switch_id/name doesn't exist at all:		tell user to fuck off
+	if switch_id/name exists but isn't mapped:	you were never there with them
+	if switch_id/name exists: remove their subscription (set timestmp and boolean to null)
+
+-Add:
+add [switch_id]
+	if switch_id is real: 		add it to the map (with name, and both stamps as null)
+	if switch_id isn't real:	return an error message
+
+-Remove:
+remove [switch_id/name]
+	if switch_id/name is real:		remove the mapping to that user
+	if switch_id/name is real, 
+	but the user isn't mapped to it:	tell user that they didn't have that switch in their repo
+	if switch_id/name isn't real:	return an error message
+
+
+-Status:
+status [switch_id/name]
+	if switch_id/name is mapped:				return the status
+	if switch_id/name isn't mapped but exists:	tell user to add that switch
+	if switch_id/name doesn't exist at all:		tell user to fuck off
+
+-List:
+list 
+	print a list of all the switches in a users repo
+
+-Setname:
+setname [switch_id]
+	if switch_id is mapped to that user:		set the name_field to the name the user wants
+	if switch_id isn't mapped to that user,
+	but is real									tell user to add that switch_id
+	if switch_id/name doesn't exist at all:		tell user to fuck off
+
+
+-Setdefault:
+setdefault [switch_id/name]
+	if switch_id is mapped to that user:		set default to this switch
+	if switch_id isn't mapped to that user,
+	but is real									tell user to add that switch_id
+	if switch_id/name doesn't exist at all:		tell user to fuck off
