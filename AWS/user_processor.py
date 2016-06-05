@@ -9,6 +9,13 @@ import twilio_parser as parser
 import constants as c
 
 
+def sanitize(args):
+    bad = ";!@#$%^&*()-_<>.,\\/\"{}[]~"
+    for a in args:
+        if (not set(a).isdisjoint(bad)):
+            return False
+    return True
+
 
 """Listen on port 80 for incoming user command"""
 def accept_command():
@@ -234,15 +241,16 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             twilio_dic = parser.twilio_to_dic(http_in)
             user = twilio_dic[c.FROM]
             commands = parser.get_command(user, twilio_dic[c.MSG])
-            resp_dic = process_command(commands) if commands is not None else None
-            response = parser.build_response(user, resp_dic)
-            s.send_response(200)
-            respond_to_user_twilio(s, response)
+            if sanitize(commands[c.ARGS]):
+                resp_dic = process_command(commands) if commands is not None else None
+                response = parser.build_response(user, resp_dic)
+                s.send_response(200)
+                respond_to_user_twilio(s, response)
         else:
             assert(False)
 
 
 
 if __name__ == "__main__":
-    #sys.stderr = open("log.txt", "a")
+    sys.stderr = open("log.txt", "a+")
     accept_command()
