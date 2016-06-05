@@ -61,7 +61,7 @@ def remove_response(dic):
 def status_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_ID and c.SWITCH_STATUS in dic:
-        response += dic[c.SWITCH_ID] + " is " + dic[SWITCH_STATUS]
+        response += dic[c.SWITCH_ID] + " is " + dic[c.SWITCH_STATUS]
     return response   
 
 def list_response(dic):
