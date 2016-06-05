@@ -111,7 +111,12 @@ def process_status(cmd_dic, platform):
     return response_dic
 
 def process_list(cmd_dic, platform):
-    pass
+	all_switches = []
+	user = cmd_dic[c.USER]
+	data = cursor.execute("SELECT switch_id FROM switches WHERE user_id == "+user+";").fetchall()
+	for d in data:
+		all_switches.append(d)
+	return all_switches
 
 def process_setname(cmd_dic, platform):
     pass
