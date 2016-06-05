@@ -173,7 +173,22 @@ def process_status(cmd_dic, platform, conn, cursor):
     return response_dic
 
 def process_list(cmd_dic, platform, conn, cursor):
-    pass
+    all_switches = []
+    rsp_dic = {}
+    user = cmd_dic[c.USER]
+    data = cursor.execute("SELECT switch_id FROM map WHERE user_id == "+user+";").fetchall()
+    if len(data) == 0:
+        rsp_dic = None
+    else:
+        for d in data:
+            all_switches.append(d[0])
+        rsp_dic[c.SWITCH_ID] = all_switches
+        rsp_dic[c.CMD] = cmd_dic[c.CMD]
+        rsp_dic[c.RSP] = c.LIST_MSGS[0]
+
+    cursor.close()
+    conn.close()
+    return rsp_dic
 
 def process_setname(cmd_dic, platform, conn, cursor):
     pass

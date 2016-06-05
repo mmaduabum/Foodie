@@ -69,7 +69,7 @@ def list_response(dic):
     if c.SWITCH_ID in dic:
         switches = dic[c.SWITCH_ID]
         for switch in switches:
-            response += switch + "\n"
+            response += str(switch) + "\n"
 
     return response
 
@@ -83,7 +83,7 @@ def setname_response(dic):
 def setdefault_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_ID in dic:
-        response += dic[c.SWITCH_ID]
+        response += str(dic[c.SWITCH_ID])
     
     return response
 
