@@ -74,6 +74,7 @@ def process_follow(cmd_dic, platform, conn, cursor):
         if len(data) == 0:
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[2]
         else:
+            #TODO: first check that sub_timeot is null. else the user is already following this switch
             update = "update map set fetty_flag = 1 where user_id == " + user + " and switch_id == " + switch + ";"
             cursor.execute(update)
             conn.commit()
@@ -86,6 +87,7 @@ def process_follow(cmd_dic, platform, conn, cursor):
         data = cursor.execute(validate).fetchall()
         #user is not yet following this switch
         if len(data) == 0:
+            #NOTE: if you follow a switch for a specific time, it is automatically added to your list
             minutes = args[1]
             update = 'insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (' + switch + \
                  ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 0);'
@@ -220,14 +222,11 @@ def process_list(cmd_dic, platform, conn, cursor):
     rsp_dic = {}
     user = cmd_dic[c.USER]
     data = cursor.execute("SELECT switch_id FROM map WHERE user_id == "+user+";").fetchall()
-    if len(data) == 0:
-        rsp_dic = None
-    else:
-        for d in data:
-            all_switches.append(d[0])
-        rsp_dic[c.SWITCH_ID] = all_switches
-        rsp_dic[c.CMD] = cmd_dic[c.CMD]
-        rsp_dic[c.RSP] = c.LIST_MSGS[0]
+    for d in data:
+        all_switches.append(d[0])
+    rsp_dic[c.SWITCH_ID] = all_switches
+    rsp_dic[c.CMD] = cmd_dic[c.CMD]
+    rsp_dic[c.RSP] = c.LIST_MSGS[0]
 
     cursor.close()
     conn.close()
