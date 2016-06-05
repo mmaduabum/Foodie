@@ -41,9 +41,13 @@ def unfollow_response(dic):
     if c.SWITCH_ID in dic:
 	response += dic[c.SWITCH_ID]
 
+    return response
+
 def add_response(dic):
     response = dic[c.RSP]
     response += dic[c.SWITCH_ID]
+
+    return response
 
 def remove_response(dic):
     response = dic[c.RSP]

@@ -58,7 +58,32 @@ def process_unfollow(cmd_dic, platform, conn, cursor):
     pass
 
 def process_add(cmd_dic, platform, conn, cursor):
-    pass
+    response_dic = {}
+    args = cmd_dic[c.ARGS]
+    if len(args) == 0:
+       response_dic = None
+    else:
+	switch = args[0]
+        user = cmd_dic[c.USER]
+    	check = "select * from switches where switch_id == " + switch + ";"
+	a = cursor.execute(check)
+	data = a.fetchall()
+        if len(data) > 0:
+            response_dic[c.SWITCH_ID] = switch
+            response_dic[c.CMD] = cmd_dic[c.CMD]
+            unique = "select * from map where switch_id == " + switch + " and user_id == " + user + ";"
+            results = cursor.execute(unique).fetchall()
+            if len(results) > 0:
+                response_dic[c.RSP] = c.ADD_MSGS[1]
+            else:
+                cursor.execute("INSERT INTO map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) VALUES ("+switch+","+user+",null,null,0);")
+                conn.commit()
+                response_dic[c.RSP] = c.ADD_MSGS[0]
+        else:
+            response_dic = None
+    cursor.close()
+    conn.close()
+    return response_dic
 
 def process_remove(cmd_dic, platform, conn, cursor):
     pass
