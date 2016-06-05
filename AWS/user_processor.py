@@ -4,6 +4,7 @@ import sys
 import messager as m
 import sqlite3
 import time
+from time_utils import timestamp_to_seconds
 import BaseHTTPServer
 import twilio_parser as parser
 import constants as c
@@ -15,12 +16,6 @@ def sanitize(args):
         if (not set(a).isdisjoint(bad)):
             return False
     return True
-
-
-def timestamp_to_seconds(stamp):
-    pattern = '%Y-%m-%d %H:%M:%S'
-    sex = int(time.mktime(time.strptime(stamp, pattern)))
-    return sex
 
 
 """Listen on port 80 for incoming user command"""
@@ -69,8 +64,8 @@ def process_follow(cmd_dic, platform, conn, cursor):
             minutes_left = time_left/60 + 1
             rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
             rsp_dic[c.FOLLOW_TIME] = minutes_left
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
-    #use default time
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
+    #use fettyflag
     elif len(args) == 1:
         switch = args[0]
         validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
@@ -86,7 +81,29 @@ def process_follow(cmd_dic, platform, conn, cursor):
             rsp_dic[c.SWITCH_ID] = switch
     
     elif len(args) == 2:
-        pass
+        switch = args[0]
+        validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
+        data = cursor.execute(validate).fetchall()
+        #user is not yet following this switch
+        if len(data) == 0:
+            minutes = args[1]
+            update = 'update map set sub_timeout = DATETIME("' + current_time + '", "+' + minutes + ' minutes")' + \
+                        ' where user_id == ' + user + ' and switch_id == ' + switch + ';'
+            cursor.execute(update)
+            conn.commit()
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+            rsp_dic[c.SWITCH_ID] = switch
+            rsp_dic[c.FOLLOW_TIME] = minutes
+        #user is already following this switch
+        else:
+            query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + switch + ";"
+            end_time = cursor.execute(query).fetchall()[0][0]
+            duration = timestamp_to_seconds(end_time)
+            time_left = duration - timestamp_to_seconds(current_time)
+            minutes_left = time_left/60 + 1
+            rsp_dic[c.SWITCH_ID] = switch
+            rsp_dic[c.FOLLOW_TIME] = minutes_left
+            rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
     #too many arguments
     else:
         rsp_dic = None
