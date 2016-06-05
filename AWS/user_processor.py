@@ -28,6 +28,7 @@ def process_follow(cmd_dic, platform, conn, cursor):
     rsp_dic = {c.CMD : cmd_dic[c.CMD]}
     args = cmd_dic[c.ARGS]
     user = cmd_dic[c.USER]
+    #Use default switch 
     if len(args) == 0:
         repeat = "select * from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
         data = cursor.execute(repeat).fetchall()
@@ -35,6 +36,7 @@ def process_follow(cmd_dic, platform, conn, cursor):
             rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
             rsp_dic[c.FOLLOW_TIME] = c.DEFAULT_TIME
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+        #user is already following 
         else:
             query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
             end_time = cursor.execute(query).fetchall()[0][0]
@@ -42,11 +44,14 @@ def process_follow(cmd_dic, platform, conn, cursor):
             rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
             rsp_dic[c.FOLLOW_TIME] = duration
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+    #use default time
     elif len(args) == 1:
         validate = "select * from map where"  
         pass
+    
     elif len(args) == 2:
         pass
+    #too many arguments
     else:
         rsp_dic = None
     
@@ -60,6 +65,7 @@ def process_unfollow(cmd_dic, platform, conn, cursor):
 def process_add(cmd_dic, platform, conn, cursor):
     response_dic = {}
     args = cmd_dic[c.ARGS]
+    #This command must have at elast 1 argument
     if len(args) == 0:
        response_dic = None
     else:
@@ -68,17 +74,21 @@ def process_add(cmd_dic, platform, conn, cursor):
     	check = "select * from switches where switch_id == " + switch + ";"
 	a = cursor.execute(check)
 	data = a.fetchall()
+        #This is a valid switch id
         if len(data) > 0:
             response_dic[c.SWITCH_ID] = switch
             response_dic[c.CMD] = cmd_dic[c.CMD]
             unique = "select * from map where switch_id == " + switch + " and user_id == " + user + ";"
             results = cursor.execute(unique).fetchall()
+            #The switch has already been added
             if len(results) > 0:
                 response_dic[c.RSP] = c.ADD_MSGS[1]
+            #Add the switch to the database
             else:
                 cursor.execute("INSERT INTO map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) VALUES ("+switch+","+user+",null,null,0);")
                 conn.commit()
                 response_dic[c.RSP] = c.ADD_MSGS[0]
+        #The supplied switch id is not a valid switch id
         else:
             response_dic = None
     cursor.close()
