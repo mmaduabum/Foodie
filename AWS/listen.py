@@ -93,13 +93,14 @@ def ram():
     #listen on port 80 in loop. probably a better way to do this
     while True:
         try:
-            incoming_message = str(sh.nc('-l', '-w', '1', port))
-            if "Twilio" not in incoming_message:
+            incoming_message = str(sh.nc('-l', '-w', '1', 3758))
+            print incoming_message
+            """if "Twilio" not in incoming_message:
                 msg_start = incoming_message.index("RAM") + 3
                 response = incoming_message[msg_start:]
                 messager.send_message(subscriber, msg=response)
             else:
-                parse_Twilio_response(incoming_message)
+                parse_Twilio_response(incoming_message)"""
         except Exception as e:
             f = open('crashes.txt', 'a+')
             f.write(str(e))
