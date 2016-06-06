@@ -32,7 +32,7 @@ def get_command(sender, msg):
 def follow_response(dic):
     response = dic[c.RSP]
     if c.FOLLOW_TIME in dic and c.SWITCH_ID in dic:
-        response += str(dic[c.SWITCH_ID]) + " for " + str(dic[c.FOLLOW_TIME])
+        response += str(dic[c.SWITCH_ID]) + " for " + str(dic[c.FOLLOW_TIME]) + " minutes"
     if c.FOLLOW_TIME not in dic and c.SWITCH_ID in dic:
         response += str(dic[c.SWITCH_ID])
 
@@ -61,7 +61,7 @@ def remove_response(dic):
 def status_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_ID and c.SWITCH_STATUS in dic:
-        response += dic[c.SWITCH_ID] + " is " + dic[SWITCH_STATUS]
+        response += dic[c.SWITCH_ID] + " is " + dic[c.SWITCH_STATUS]
     return response   
 
 def list_response(dic):
@@ -69,7 +69,7 @@ def list_response(dic):
     if c.SWITCH_ID in dic:
         switches = dic[c.SWITCH_ID]
         for switch in switches:
-            response += switch + "\n"
+            response += str(switch) + "\n"
 
     return response
 
@@ -83,7 +83,7 @@ def setname_response(dic):
 def setdefault_response(dic):
     response = dic[c.RSP]
     if c.SWITCH_ID in dic:
-        response += dic[c.SWITCH_ID]
+        response += str(dic[c.SWITCH_ID])
     
     return response
 

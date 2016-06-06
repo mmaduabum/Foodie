@@ -1,3 +1,8 @@
+USERS: user_id, user_medium, default_switch_id
+SWITCHES: switch_id, state
+SWITCH_USER_MAP: switch_id, user_id, name, sub_tmstmp_exp, fetty_flag
+
+
 command overview:
 
 -Follow:
