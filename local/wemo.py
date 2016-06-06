@@ -9,7 +9,7 @@ OFF = 0
 THRESH = "threshold"
 YMCMB_THRESH = 4500
 PADDY_THRESH = 400
-UB_PORT_NUMBER = 3758
+HUB_PORT_NUMBER = 3758
 NAME = "name"
 SWITCH = "switch"
 STATE = "state"
@@ -26,12 +26,13 @@ def on_motion(motion):
 
 
 def notify_AWS(switches):
+	print "State change detected. Sending HTTP"
 	msg = {}
 	for s in switches:
 		msg[s[ID]] = s[STATE]
 	data = json.dumps(msg)
 	conn = httplib.HTTPConnection("52.39.99.178", HUB_PORT_NUMBER)
-	conn.request("POST", "", msg)
+	conn.request("POST", "", data)
 
 
 def powering_off(history):
@@ -59,7 +60,7 @@ def run_local_server(switches):
 			power = s[SWITCH].current_power
 			last_powers.pop(0)
 			last_powers.append(power)
-			print "Switch " + s[NAME] + "has current power = " + str(power)
+			print "Switch " + s[NAME] + " has current power = " + str(power)
 			if power < THRESH and powering_off(last_powers) and last_state == ON:
 				change = True
 				last_state = OFF
@@ -84,7 +85,7 @@ if __name__ == "__main__":
 	print "Searching for switches..."
 	while True:
 		tries += 1
-		names = env.list()
+		names = env.list_switches()
 		if len(names) > 0: break
 		if tries == 100: 
 			print "FAILED to find a switch after 100 tries"
