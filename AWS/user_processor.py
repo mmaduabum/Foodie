@@ -301,7 +301,7 @@ def process_command(cmd_dic, platform=False):
         if cmd == command:
             conn = sqlite3.connect(c.DB)
             cursor = conn.cursor()
-            validate_user(cmd_dic[c.USER], conn, cursor, 1)
+            validate_user(cmd_dic[c.USER], conn, cursor, c.TEXT_FLAG)
             return proc(cmd_dic, platform, conn, cursor)
 
 
