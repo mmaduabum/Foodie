@@ -64,9 +64,11 @@ def run_local_server(switches):
 			if power < THRESH and powering_off(last_powers) and last_state == ON:
 				change = True
 				last_state = OFF
+				s[STATE] = OFF
 			elif power < THRESH and powering_on(last_powers) and last_state == OFF:
 				change = True
 				last_state = ON
+				s[STATE] = ON
 		#if any state has changed, notify AWS
 		if change:
 			change = False
