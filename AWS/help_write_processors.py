@@ -1,7 +1,3 @@
-USERS: user_id, user_medium, default_switch_id
-SWITCHES: switch_id, state
-SWITCH_USER_MAP: switch_id, user_id, name, sub_tmstmp_exp, sub_bool
-
 
 def process_follow(cmd_dic, platform):
     args = cmd_dic[c.ARGS]
