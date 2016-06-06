@@ -18,13 +18,12 @@ def update_subscriptions(conn,cursor):
 		switch = sub[1]
 		end_time = sub[2]
 		#check datatime
-        duration = timestamp_to_seconds(end_time)
-        time_left = duration - timestamp_to_seconds(current_time)
-        minutes_left = time_left/60 + 1
-        if minutes_left <=0:
+        end = timestamp_to_seconds(end_time)
+        now = timestamp_to_seconds(current_time)
+        if now > end:
 			update_map = 'update map set fetty_flag = 0, sub_tmstmp_exp = null where switch_id == ' + switch_id +" and user_id == " + u_id ';'
 			cursor.execute(update_map)
-			conn.commit
+			conn.commit()
 
 
 """Listen on port 3658 for incoming status from the Pi"""
@@ -36,7 +35,7 @@ def accept_command():
 
 def notify_user(u_id,medium,state, switch_id):
 	msg = "Your switch, " + switch_id
-	if (state == 1):
+	if (int(state) == 1):
 		msg += " is now on"
 	else:
 		msg += " is now off"
@@ -44,7 +43,7 @@ def notify_user(u_id,medium,state, switch_id):
 		messager.send_message(u_id, msg)
 
 def process_switch(switch_id,state, conn, cursor):
-	check = "select * from switches where switch_id == " + switch + ";"
+	check = "select * from switches where switch_id == " + switch_id + ";"
     a = cursor.execute(check)
     data = a.fetchall()
     #This is a valid switch id
