@@ -61,8 +61,6 @@ def run_local_server(switches):
 			last_powers_list[i].pop(0)
 			last_powers_list[i].append(power)
 			print "Switch " + s[NAME] + " has current power = " + str(power)
-			print last_powers
-			print last_state
 			if power < s[THRESH] and powering_off(last_powers) and last_state == ON:
 				change = True
 				last_states_list[i] = OFF
