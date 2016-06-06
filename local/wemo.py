@@ -7,8 +7,8 @@ import sys
 ON = 1
 OFF = 0
 THRESH = "threshold"
-YMCMB_THRESH = 4500
-PADDY_THRESH = 400
+YMCMB_THRESH = 400
+PADDY_THRESH = 4500
 HUB_PORT_NUMBER = 3758
 NAME = "name"
 SWITCH = "switch"
@@ -56,17 +56,21 @@ def run_local_server(switches):
 	#check power statuses forever	
 	while True:
 		change = False
-		for s, last_state, last_powers in zip(switches, last_states_list, last_powers_list):
+		for i, (s, last_state, last_powers) in enumerate(zip(switches, last_states_list, last_powers_list)):
 			power = s[SWITCH].current_power
-			last_powers.pop(0)
-			last_powers.append(power)
+			last_powers_list[i].pop(0)
+			last_powers_list[i].append(power)
 			print "Switch " + s[NAME] + " has current power = " + str(power)
-			if power < THRESH and powering_off(last_powers) and last_state == ON:
+			print last_powers
+			print last_state
+			if power < s[THRESH] and powering_off(last_powers) and last_state == ON:
 				change = True
-				last_state = OFF
-			elif power < THRESH and powering_on(last_powers) and last_state == OFF:
+				last_states_list[i] = OFF
+				switches[i][STATE] = OFF
+			elif power < s[THRESH] and powering_on(last_powers) and last_state == OFF:
 				change = True
-				last_state = ON
+				last_states_list[i] = ON
+				switches[i][STATE] = ON
 		#if any state has changed, notify AWS
 		if change:
 			change = False
