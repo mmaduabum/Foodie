@@ -51,7 +51,7 @@ def process_follow(cmd_dic, platform, conn, cursor):
             rsp_dic[c.FOLLOW_TIME] = c.DEFAULT_TIME
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
             sub_time = current_time
-            update = 'update map set sub_timeout = DATETIME("' + sub_time + '", "+10 minutes")' + \
+            update = 'update map set fetty_flag = 1 set sub_timeout = DATETIME("' + sub_time + '", "+10 minutes")' + \
                         ' where user_id == ' + user + ' and switch_id == ' + str(c.DEFAULT_SWITCH) + ';'
             cursor.execute(update)
             conn.commit()
@@ -85,12 +85,12 @@ def process_follow(cmd_dic, platform, conn, cursor):
         switch = args[0]
         validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
         data = cursor.execute(validate).fetchall()
+        minutes = args[1]
         #user is not yet following this switch
         if len(data) == 0:
             #NOTE: if you follow a switch for a specific time, it is automatically added to your list
-            minutes = args[1]
             update = 'insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (' + switch + \
-                 ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 0);'
+                 ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 1);'
             cursor.execute(update)
             conn.commit()
             rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
@@ -100,12 +100,20 @@ def process_follow(cmd_dic, platform, conn, cursor):
         else:
             query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + switch + ";"
             end_time = cursor.execute(query).fetchall()[0][0]
-            duration = timestamp_to_seconds(end_time)
-            time_left = duration - timestamp_to_seconds(current_time)
-            minutes_left = time_left/60 + 1
-            rsp_dic[c.SWITCH_ID] = switch
-            rsp_dic[c.FOLLOW_TIME] = minutes_left
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
+            if end_time is not None:
+                duration = timestamp_to_seconds(end_time)
+                time_left = duration - timestamp_to_seconds(current_time)
+                minutes_left = time_left/60 + 1
+                rsp_dic[c.SWITCH_ID] = switch
+                rsp_dic[c.FOLLOW_TIME] = minutes_left
+                rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
+            #update existing entry
+            else:
+                update = "update map set sub_timeout = " + current_time + ", set fetty_flaf = 1 where user_id == " + \
+                                     user + " and switch_id == " + switch + ";"
+                rsp_dic[c.SWITCH_ID] = switch
+                rsp_dic[c.FOLLOW_TIME] = minutes
+                rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
     #too many arguments
     else:
         rsp_dic = None
@@ -130,7 +138,7 @@ def process_unfollow(cmd_dic, platform, conn, cursor):
         if len(data) > 0:
             response_dic[c.SWITCH_ID] = switch
             response_dic[c.CMD] = cmd_dic[c.CMD]
-            unique = "select * from map where switch_id == " + switch + " and user_id == " + user + " and fetty_flag == 1 and sub_timeout != null;"
+            unique = "select * from map where switch_id == " + switch + " and user_id == " + user + " and fetty_flag == 1;"
             results = cursor.execute(unique).fetchall()
             #There is a map from switch to user with an on flag
             if len(results) > 0:
@@ -143,15 +151,10 @@ def process_unfollow(cmd_dic, platform, conn, cursor):
                 results = cursor.execute(unique).fetchall()
                 #There is a switch to user pair in map, need to follow it before they can unfollow it
                 if len(results) > 0:
-                    cursor.execute("update map set fetty_flag = 0, sub_timeout = null where switch_id == "+switch+" and user_id == "+user+";")
-                    conn.commit()
-                    response_dic[c.RSP] = c.UNFOLLOW_MSGS[1]
+                    response_dic[c.RSP] = c.UNFOLLOW_MSGS[0]
                 #so tell them to add it before they can unfollow it
                 else:
-                    response_dic[c.RSP] = c.ADD_MSGS[2]
-            # there is no (switch, id) pair in map, so tell them to follow it before they can unfollow it
-            else:
-                response_dic[c.RSP] = c.UNFOLLOW_MSGS[0]
+                    response_dic[c.RSP] = c.UNFOLLOW_MSGS[2]
         #The supplied switch id is not a valid switch id
         else:
             response_dic = None
