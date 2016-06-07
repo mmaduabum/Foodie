@@ -280,7 +280,7 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(s):
         if c.TWILIO_SIGNATURE in s.headers:
             http_in = s.rfile.read(int(s.headers.getheader('Content-Length')))
-            twilio_dic = parser.twilio_to_dic(http_in)
+            twilio_dic = parser.twilio_to_dic(http_in.lower())
             user = twilio_dic[c.FROM]
             commands = parser.get_command(user, twilio_dic[c.MSG])
             if sanitize(commands):

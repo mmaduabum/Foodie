@@ -1,6 +1,6 @@
 DB = 'monica.db'
-FROM = "From"
-MSG = "Body"
+FROM = "from"
+MSG = "body"
 SPOOKY_INDEX = 4
 US = "+16508351609"
 BEAKS = "+16464630213"
