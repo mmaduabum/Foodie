@@ -67,10 +67,15 @@ def status_response(dic):
 
 def list_response(dic):
     response = dic[c.RSP]
-    if c.SWITCH_ID in dic:
+    if c.SWITCH_ID in dic and c.BEAKS_FEATURE in dic and c.ihateyouguys in dic:
+        fettys = dic[c.ihateyouguys]
         switches = dic[c.SWITCH_ID]
-        for switch in switches:
-            response += str(switch) + "\n"
+        times = dic[c.BEAKS_FEATURE]
+        for switch, t, f in zip(switches, times, fettys):
+            response += str(switch)
+            if t is not None: response += ": following for " + str(t) + " minutes\n"
+            elif int(f) == 1: response += ": following\n"
+            else: response += "\n"
 
     return response
 
@@ -88,13 +93,17 @@ def setdefault_response(dic):
     
     return response
 
+def help_response(dic):
+    response = dic[c.RSP]
+    return response
+
 
 def build_response(sender, response_dic):
     if response_dic is None:
         return c.DEFAULT_ERROR_MESSAGE
     response = "Hey! We are processing your request"
     command = response_dic[c.CMD]
-    parsers = [follow_response, unfollow_response, add_response, remove_response, status_response, list_response, setname_response, setdefault_response]
+    parsers = [follow_response, unfollow_response, add_response, remove_response, status_response, list_response, setname_response, setdefault_response, help_response]
     for parser, cmd in zip(parsers, c.VALID_CMDS):
         if command == cmd:
             return parser(response_dic)

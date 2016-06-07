@@ -225,15 +225,29 @@ def process_status(cmd_dic, platform, conn, cursor):
     return response_dic
 
 def process_list(cmd_dic, platform, conn, cursor):
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
     all_switches = []
+    fettys = []
+    times = []
     rsp_dic = {}
     user = cmd_dic[c.USER]
-    data = cursor.execute("SELECT switch_id FROM map WHERE user_id == "+user+";").fetchall()
-    for d in data:
-        all_switches.append(d[0])
+    data = cursor.execute("SELECT switch_id, sub_timeout, fetty_flag FROM map WHERE user_id == "+user+";").fetchall()
+    for (d, end_time, fetty) in data:
+        if end_time is not None:
+            duration = timestamp_to_seconds(end_time)
+            time_left = duration - timestamp_to_seconds(current_time)
+            minutes_left = time_left/60 + 1
+            times.append(minutes_left)
+        else:
+            times.append(end_time)
+
+        fettys.append(fetty)
+        all_switches.append(d)
     rsp_dic[c.SWITCH_ID] = all_switches
     rsp_dic[c.CMD] = cmd_dic[c.CMD]
     rsp_dic[c.RSP] = c.LIST_MSGS[0]
+    rsp_dic[c.BEAKS_FEATURE] = times
+    rsp_dic[c.ihateyouguys] = fettys
 
     cursor.close()
     conn.close()
@@ -246,6 +260,12 @@ def process_setdefault(cmd_dic, platform, conn, cursor):
     pass
 
 
+def process_help(cmd_dic, platform, conn, cursor):
+    rsp_dic = {}
+    rsp_dic[c.CMD] = cmd_dic[c.CMD]
+    rsp_dic[c.RSP] = c.HELP_MSG
+    return rsp_dic
+
 def validate_user(user, conn, cursor, platform_id):
     check = "select * from users where user_id == " + user + ";"
     results = cursor.execute(check)
@@ -257,7 +277,7 @@ def validate_user(user, conn, cursor, platform_id):
 
 """execute the user's command"""
 def process_command(cmd_dic, platform=False):
-    processors = [process_follow, process_unfollow, process_add, process_remove, process_status, process_list, process_setname, process_setdefault]
+    processors = [process_follow, process_unfollow, process_add, process_remove, process_status, process_list, process_setname, process_setdefault, process_help]
     command = cmd_dic[c.CMD]
     for cmd, proc in zip(c.VALID_CMDS, processors):
         if cmd == command:
