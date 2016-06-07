@@ -10,7 +10,9 @@ import twilio_parser as parser
 import constants as c
 
 
-def sanitize(args):
+def sanitize(cmds):
+    if cmds is None: return True
+    args = cmds[c.ARGS]
     bad = ";!@#$%^&*()-_<>.,\\/\"{}[]~"
     for a in args:
         if (not set(a).isdisjoint(bad)):
@@ -32,95 +34,55 @@ def respond_to_user_twilio(s, response):
     s.end_headers()
     s.wfile.write(response)
 
+
 def process_follow(cmd_dic, platform, conn, cursor):
-    rsp_dic = {c.CMD : cmd_dic[c.CMD]}
+    rsp_dic = None
     args = cmd_dic[c.ARGS]
     user = cmd_dic[c.USER]
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-    #Use default switch 
-    if len(args) == 0:
-        repeat = "select * from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
+    #no time specified. one time follow
+    if len(args) > 0:
+        rsp_dic = {c.CMD : cmd_dic[c.CMD]}
+        switch = args[0]
+        repeat = "select fetty_flag from map where user_id == " + user + " and switch_id == " + str(switch) + ";"
         data = cursor.execute(repeat).fetchall()
-        #need to first add default switch
+        rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
+        rsp_dic[c.SWITCH_ID] = switch
+        #add switch first
         if len(data) == 0:
             add_default = "insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (" + \
-                             str(c.DEFAULT_SWITCH) + ", " + user + ", null, null, 0);"
+                             str(switch) + ", " + user + ", null, null, 1);"
+            #add time if needed
+            if len(args) == 2:
+                minutes = args[1]
+                add_default = 'insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (' + switch + \
+                     ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 1);'
+                rsp_dic[c.FOLLOW_TIME] = minutes
+
             cursor.execute(add_default)
             conn.commit()
-            rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
-            rsp_dic[c.FOLLOW_TIME] = c.DEFAULT_TIME
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
-            sub_time = current_time
-            update = 'update map set fetty_flag = 1 set sub_timeout = DATETIME("' + sub_time + '", "+10 minutes")' + \
-                        ' where user_id == ' + user + ' and switch_id == ' + str(c.DEFAULT_SWITCH) + ';'
-            cursor.execute(update)
-            conn.commit()
-        #user is already following 
+
+        #set fetty flag or flag and time
         else:
-            query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + str(c.DEFAULT_SWITCH) + ";"
-            end_time = cursor.execute(query).fetchall()[0][0]
-            duration = timestamp_to_seconds(end_time)
-            time_left = duration - timestamp_to_seconds(current_time)
-            minutes_left = time_left/60 + 1
-            rsp_dic[c.SWITCH_ID] = c.DEFAULT_SWITCH
-            rsp_dic[c.FOLLOW_TIME] = minutes_left
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
-    #use fettyflag
-    elif len(args) == 1:
-        switch = args[0]
-        validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
-        data = cursor.execute(validate).fetchall()
-        #the user has not yet added this switch
-        if len(data) == 0:
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[2]
-        else:
-            #TODO: first check that sub_timeot is null. else the user is already following this switch
-            update = "update map set fetty_flag = 1 where user_id == " + user + " and switch_id == " + switch + ";"
-            cursor.execute(update)
-            conn.commit()
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
-            rsp_dic[c.SWITCH_ID] = switch
-    
-    elif len(args) == 2:
-        switch = args[0]
-        validate = "select * from map where user_id == " + user + " and switch_id == " + switch + ";"  
-        data = cursor.execute(validate).fetchall()
-        minutes = args[1]
-        #user is not yet following this switch
-        if len(data) == 0:
-            #NOTE: if you follow a switch for a specific time, it is automatically added to your list
-            update = 'insert into map (switch_id, user_id, switch_name, sub_timeout, fetty_flag) values (' + switch + \
-                 ', ' + user + ', null, ' + 'DATETIME("' + current_time + '", "+' + minutes + ' minutes"), 1);'
-            cursor.execute(update)
-            conn.commit()
-            rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
-            rsp_dic[c.SWITCH_ID] = switch
-            rsp_dic[c.FOLLOW_TIME] = minutes
-        #user is already following this switch
-        else:
-            query = "select sub_timeout from map where user_id == " + user + " and switch_id == " + switch + ";"
-            end_time = cursor.execute(query).fetchall()[0][0]
-            if end_time is not None:
-                duration = timestamp_to_seconds(end_time)
-                time_left = duration - timestamp_to_seconds(current_time)
-                minutes_left = time_left/60 + 1
-                rsp_dic[c.SWITCH_ID] = switch
-                rsp_dic[c.FOLLOW_TIME] = minutes_left
-                rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
-            #update existing entry
+            if str(data[0][0]) != "1":
+                update = 'update map set fetty_flag = 1  where user_id == ' + user + ' and switch_id == ' + str(switch) + ';'
+                
+                if len(args) == 2:
+                    minutes = args[1]
+                    update = 'update map set fetty_flag = 1, sub_timeout = DATETIME("' + current_time + '", "+' + minutes + ' minutes")' + \
+                            ' where user_id == ' + user + ' and switch_id == ' + str(switch) + ';'
+                    rsp_dic[c.FOLLOW_TIME] = minutes
+
+                cursor.execute(update)
+                conn.commit()
+            #user is already following
             else:
-                update = "update map set sub_timeout = " + current_time + ", set fetty_flaf = 1 where user_id == " + \
-                                     user + " and switch_id == " + switch + ";"
-                rsp_dic[c.SWITCH_ID] = switch
-                rsp_dic[c.FOLLOW_TIME] = minutes
-                rsp_dic[c.RSP] = c.FOLLOW_MSGS[0]
-    #too many arguments
-    else:
-        rsp_dic = None
-    
+                rsp_dic[c.RSP] = c.FOLLOW_MSGS[1]
+
     cursor.close()
     conn.close()
     return rsp_dic
+
 
 def process_unfollow(cmd_dic, platform, conn, cursor):
     response_dic = {}
@@ -321,15 +283,13 @@ class UserHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             twilio_dic = parser.twilio_to_dic(http_in)
             user = twilio_dic[c.FROM]
             commands = parser.get_command(user, twilio_dic[c.MSG])
-            if sanitize(commands[c.ARGS]):
+            if sanitize(commands):
                 resp_dic = process_command(commands) if commands is not None else None
                 response = parser.build_response(user, resp_dic)
                 s.send_response(200)
                 respond_to_user_twilio(s, response)
             else:
                 m.send_message(user, "Fuck off")
-        else:
-            assert(False)
 
 
 

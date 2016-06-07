@@ -55,7 +55,7 @@ def process_switch(switch_id,state, conn, cursor):
     if len(data) > 0:
     	state_check = "select state from switches where switch_id == " + switch_id + ";"
         a = cursor.execute(state_check)
-        cur_state = a.fetchall()[0][0]
+        cur_state = str(a.fetchall()[0][0])
         #This is a valid switch id
         if cur_state != state:
             # get all users following that switch
@@ -67,10 +67,10 @@ def process_switch(switch_id,state, conn, cursor):
                 medium_check = "select platform_id from users where user_id == " + u_id + ";" 
                 medium = cursor.execute(medium_check).fetchall()[0][0]
                 notify_user(u_id,medium,state, switch_id)
-                if (tmstp == None):
+                if tmstp is None:
                     update_map = 'update map set fetty_flag = 0 where switch_id == ' + switch_id +" and user_id == " + u_id + ';'
                     cursor.execute(update_map)
-                    conn.commit
+                    conn.commit()
 
         update = 'update switches set state = '+state+' where switch_id == ' + switch_id + ';'
         cursor.execute(update)
