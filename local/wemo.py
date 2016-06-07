@@ -7,8 +7,10 @@ import sys
 ON = 1
 OFF = 0
 THRESH = "threshold"
-YMCMB_THRESH = 400
-PADDY_THRESH = 4500
+MIN = "min"
+YMCMB_THRESH = 36000
+YMCMB_MIN = 500
+PADDY_THRESH = 1400000
 HUB_PORT_NUMBER = 3758
 NAME = "name"
 SWITCH = "switch"
@@ -52,6 +54,7 @@ def run_local_server(switches):
 	print str(num_switches) + " Found!"
 
 	last_powers_list = [[0, 0, 0]]*num_switches
+	for i in range(num_switches): last_powers_list[i] = [0, 0, 0]
 	last_states_list = [OFF]*num_switches
 	#check power statuses forever	
 	while True:
@@ -61,11 +64,11 @@ def run_local_server(switches):
 			last_powers_list[i].pop(0)
 			last_powers_list[i].append(power)
 			print "Switch " + s[NAME] + " has current power = " + str(power)
-			if power < s[THRESH] and powering_off(last_powers) and last_state == ON:
+			if power < s[THRESH] and power >= s[MIN] and powering_off(last_powers) and last_state == ON:
 				change = True
 				last_states_list[i] = OFF
 				switches[i][STATE] = OFF
-			elif power < s[THRESH] and powering_on(last_powers) and last_state == OFF:
+			elif power < s[THRESH] and power >= s[MIN] and powering_on(last_powers) and last_state == OFF:
 				change = True
 				last_states_list[i] = ON
 				switches[i][STATE] = ON
@@ -77,35 +80,46 @@ def run_local_server(switches):
 		time.sleep(1)
 
 
-if __name__ == "__main__":
-	print "Powering up server..."
-	switches = []
-	env = Environment(on_switch, on_motion)
-	env.start()
-	#search until a switch is found
-	tries = 0
-	print "Searching for switches..."
-	while True:
-		tries += 1
-		names = env.list_switches()
-		if len(names) > 0: break
-		if tries == 100: 
-			print "FAILED to find a switch after 100 tries"
-			sys.exit()
-	#create a dictionary object wrapper for each found switch
-	for switch_name in names:
-		s = {NAME : switch_name, SWITCH : None, STATE : OFF, ID : None, THRESH : None}
-		if switch_name == "ymcmb":
-			ymcmb = env.get_switch('ymcmb')
-			s[SWITCH] = ymcmb
-			s[ID] = YMCMB_ID
-			s[THRESH] = YMCMB_THRESH
-		elif switch_name == "paddy":
-			paddy = env.get_switch('paddy')
-			s[SWITCH] = paddy
-			s[ID] = PADDY_ID
-			s[THRESH] = PADDY_THRESH
-		#create a list of all found switches
-		switches.append(s)
+def go_pi():
+	try:
+		#sys.stderr = open("otherlog.txt", "wa+")
+		#sys.stdout = open("log.txt", "wa+")
+		print "Powering up server..."
+		switches = []
+		env = Environment(on_switch, on_motion)
+		env.start()
+		#search until a switch is found
+		tries = 0
+		print "Searching for switches..."
+		while True:
+			tries += 1
+			names = env.list_switches()
+			if len(names) > 0: break
+			if tries == 100: 
+				print "FAILED to find a switch after 100 tries"
+				sys.exit()
+		#create a dictionary object wrapper for each found switch
+		for switch_name in names:
+			s = {NAME : switch_name, SWITCH : None, STATE : OFF, ID : None, THRESH : None, MIN : 0}
+			if switch_name == "ymcmb":
+				ymcmb = env.get_switch('ymcmb')
+				s[SWITCH] = ymcmb
+				s[ID] = YMCMB_ID
+				s[THRESH] = YMCMB_THRESH
+				s[MIN] = YMCMB_MIN
+			elif switch_name == "patty":
+				paddy = env.get_switch('patty')
+				s[SWITCH] = paddy
+				s[ID] = PADDY_ID
+				s[THRESH] = PADDY_THRESH
+			#create a list of all found switches
+			switches.append(s)
 
-	run_local_server(switches)
+		run_local_server(switches)
+	except:
+		pass
+
+
+if __name__ == "__main__":
+	while True: go_pi()
+	go_pi()
