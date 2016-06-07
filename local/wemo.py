@@ -9,7 +9,7 @@ OFF = 0
 THRESH = "threshold"
 MIN = "min"
 YMCMB_THRESH = 36000
-YMCMB_MIN = 500
+YMCMB_MIN = 650
 PADDY_THRESH = 1400000
 HUB_PORT_NUMBER = 3758
 NAME = "name"
@@ -63,7 +63,6 @@ def run_local_server(switches):
 			power = s[SWITCH].current_power
 			last_powers_list[i].pop(0)
 			last_powers_list[i].append(power)
-			print "Switch " + s[NAME] + " has current power = " + str(power)
 			if power < s[THRESH] and power >= s[MIN] and powering_off(last_powers) and last_state == ON:
 				change = True
 				last_states_list[i] = OFF
@@ -82,8 +81,8 @@ def run_local_server(switches):
 
 def go_pi():
 	try:
-		#sys.stderr = open("otherlog.txt", "wa+")
-		#sys.stdout = open("log.txt", "wa+")
+		sys.stderr = open("otherlog.txt", "wa+")
+		sys.stdout = open("log.txt", "wa+")
 		print "Powering up server..."
 		switches = []
 		env = Environment(on_switch, on_motion)
@@ -122,4 +121,3 @@ def go_pi():
 
 if __name__ == "__main__":
 	while True: go_pi()
-	go_pi()
